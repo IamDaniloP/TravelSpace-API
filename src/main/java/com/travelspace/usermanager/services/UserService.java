@@ -2,43 +2,46 @@ package com.travelspace.usermanager.services;
 
 import com.travelspace.usermanager.domain.entities.User;
 import com.travelspace.usermanager.repositories.UserRepository;
-import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class UserService implements IUserService{
-
   @Autowired
   private UserRepository repository;
-  @Override
-  public User RegisterUser(User user) throws EntityExistsException {
-    List<User> userList = repository.findAll();
-    boolean existingUser = userList.stream().anyMatch(existingUserEmail -> existingUserEmail.getEmail().equals(user.getEmail()));
+  @PersistenceContext
+  private EntityManager entityManager;
 
-    if (!existingUser) {
+  @Override
+  public User RegisterUser(User user) {
+    String jpql = "FROM User WHERE email = :email";
+    Query query = entityManager.createQuery(jpql)
+            .setParameter("email", user.getEmail());
+    List resultUserData = query.getResultList();
+
+    if (resultUserData.isEmpty()) {
       return repository.save(user);
     }
 
-    throw new EntityExistsException("Already registered user!");
+    throw new EntityExistsException("User already registered");
   }
 
   @Override
   public User LoginUser(String email, String password) throws NoSuchFieldException {
-    List<User> userList = repository.findAll();
-    boolean emailFound = userList.stream().anyMatch(existingUserEmail -> existingUserEmail.getEmail().equals(email));
-    boolean passwordFound = userList.stream().anyMatch(existingUserPassword -> existingUserPassword.getPassword().equals(password));
+    try {
+      String jpql = "FROM User WHERE email = :email AND password = :password";
+      User resultUserData = entityManager.createQuery(jpql, User.class)
+              .setParameter("email", email)
+              .setParameter("password", password)
+              .getSingleResult();
 
-    if (emailFound && passwordFound) {
-      for (User user : userList) {
-        if (user.getEmail().equals(email)) {
-          return user;
-        }
-      }
+      return resultUserData;
     }
-    throw new NoSuchFieldException("User not registered");
+    catch (NoResultException e) {
+      throw new NoSuchFieldException("Invalid credentials!");
+    }
   }
 }

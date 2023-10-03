@@ -57,7 +57,7 @@ Tomcat started on port(s): 8080 (http)
 - Realizar a criação da API ✅
 - Realizar a criação das Rotas ✅
 - Realizar implementação com banco de dados ✅
-- Realizar melhorias na busca dos usuários
+- Realizar melhorias na busca dos usuários ✅
 - Realizar implementação do token JWT para autenticar o usuário
 
 ## Colaboradores
