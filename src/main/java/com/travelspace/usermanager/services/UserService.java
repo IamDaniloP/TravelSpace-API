@@ -23,6 +23,7 @@ public class UserService implements IUserService{
     List resultUserData = query.getResultList();
 
     if (resultUserData.isEmpty()) {
+      user.setPassword(String.valueOf(user.getPassword().hashCode()));
       return repository.save(user);
     }
 
@@ -35,7 +36,7 @@ public class UserService implements IUserService{
       String jpql = "FROM User WHERE email = :email AND password = :password";
       User resultUserData = entityManager.createQuery(jpql, User.class)
               .setParameter("email", email)
-              .setParameter("password", password)
+              .setParameter("password", String.valueOf(password.hashCode()))
               .getSingleResult();
 
       return resultUserData;
