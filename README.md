@@ -69,5 +69,4 @@ Tomcat started on port(s): 8080 (http)
 * Vinícius Caliel Nunes Passos - [Linkedin](https://www.linkedin.com/in/caliel-passos-08495126a/) | [GitHub](https://github.com/vinicaliel)
 * Nicolas Rafael Silva Lucena - [Linkedin](https://www.linkedin.com/in/nícolasrsl/) | [GitHub](https://github.com/Nick-rsl)
 
-## Repositório(Front-end)
-- [GitHub](https://github.com/eupedrorodrigues/TravelSpace)
+- [Repositório Fron-end](https://github.com/eupedrorodrigues/TravelSpace)
