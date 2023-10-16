@@ -58,7 +58,7 @@ Tomcat started on port(s): 8080 (http)
 - Realizar a criação das Rotas ✅
 - Realizar implementação com banco de dados ✅
 - Realizar melhorias na busca dos usuários ✅
-- Realizar implementação do token JWT para autenticar o usuário
+- Realizar implementação do token JWT com spring-security para autenticar o usuário ✅
 
 ## :man_office_worker: Contribuidores do projeto
 
