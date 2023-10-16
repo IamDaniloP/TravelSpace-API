@@ -1,4 +1,4 @@
-package com.travelspace.usermanager.dtos;
+package com.travelspace.usermanager.domain.dtos;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

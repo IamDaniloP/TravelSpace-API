@@ -4,45 +4,24 @@ import com.travelspace.usermanager.domain.entities.User;
 import com.travelspace.usermanager.repositories.UserRepository;
 import jakarta.persistence.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class UserService implements IUserService{
+public class UserService implements UserDetailsService {
   @Autowired
   private UserRepository repository;
-  @PersistenceContext
-  private EntityManager entityManager;
 
-  @Override
   public User RegisterUser(User user) {
-    String jpql = "FROM User WHERE email = :email";
-    Query query = entityManager.createQuery(jpql)
-            .setParameter("email", user.getEmail());
-    List resultUserData = query.getResultList();
-
-    if (resultUserData.isEmpty()) {
-      user.setPassword(String.valueOf(user.getPassword().hashCode()));
-      return repository.save(user);
-    }
-
-    throw new EntityExistsException("User already registered");
+    return repository.save(user);
   }
 
   @Override
-  public User LoginUser(String email, String password) throws NoSuchFieldException {
-    try {
-      String jpql = "FROM User WHERE email = :email AND password = :password";
-      User resultUserData = entityManager.createQuery(jpql, User.class)
-              .setParameter("email", email)
-              .setParameter("password", String.valueOf(password.hashCode()))
-              .getSingleResult();
-
-      return resultUserData;
-    }
-    catch (NoResultException e) {
-      throw new NoSuchFieldException("Invalid credentials!");
-    }
+  public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    return repository.findByEmail(email);
   }
 }
