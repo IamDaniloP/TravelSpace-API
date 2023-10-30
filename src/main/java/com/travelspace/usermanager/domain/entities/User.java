@@ -1,5 +1,6 @@
 package com.travelspace.usermanager.domain.entities;
 
+import com.travelspace.usermanager.domain.dtos.RegisterUserDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -60,5 +61,15 @@ public class User implements Serializable, UserDetails {
   @Override
   public boolean isEnabled() {
     return true;
+  }
+
+  public void MapFromDto(RegisterUserDto userDto) {
+    this.name = userDto.getName();
+    this.birthDate = userDto.getBirthDate();
+    this.email = userDto.getEmail();
+    this.password = userDto.getPassword();
+    this.country = userDto.getCountry();
+    this.state = userDto.getState();
+    this.city = userDto.getCity();
   }
 }

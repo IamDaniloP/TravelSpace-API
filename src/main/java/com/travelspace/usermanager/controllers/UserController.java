@@ -7,6 +7,7 @@ import com.travelspace.usermanager.domain.dtos.RegisterUserDto;
 import com.travelspace.usermanager.infra.security.TokenResponse;
 import com.travelspace.usermanager.infra.security.TokenService;
 import com.travelspace.usermanager.services.UserService;
+import com.travelspace.usermanager.services.interfaces.IUserService;
 import jakarta.persistence.EntityExistsException;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
@@ -15,40 +16,38 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("auth")
+@RequestMapping("api")
 public class UserController {
-  @Autowired
-  private UserService userService;
-
-  @Autowired
+  private IUserService userService;
   private AuthenticationManager authenticationManager;
-
-  @Autowired
   private TokenService tokenService;
 
-  @PostMapping("/register")
-  public ResponseEntity register(@RequestBody @Valid RegisterUserDto userDto) {
-    if (this.userService.loadUserByUsername(userDto.getEmail()) != null) return ResponseEntity.badRequest().body("User already exist!");
-    try {
-      User copiedUser = new User();
-      String encryptedPassword = new BCryptPasswordEncoder().encode(userDto.getPassword());
-      userDto.setPassword(encryptedPassword);
-      BeanUtils.copyProperties(userDto, copiedUser);
+  @Autowired
+  public UserController(IUserService userService, AuthenticationManager authenticationManager, TokenService tokenService) {
+    this.userService = userService;
+    this.authenticationManager = authenticationManager;
+    this.tokenService = tokenService;
+  }
 
-      User newUser = userService.RegisterUser(copiedUser);
+  @PostMapping("auth/register")
+  public ResponseEntity register(@RequestBody @Valid RegisterUserDto userDto) {
+    try {
+      User newUser = userService.RegisterUser(userDto);
       return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
     }
-    catch (EntityExistsException e) {
-      System.out.println(e.getMessage());
+    catch (UsernameNotFoundException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
   }
 
-  @PostMapping("/login")
+  @PostMapping("auth/login")
   public ResponseEntity<TokenResponse> login(@RequestBody @Valid LoginUserDto userDto) {
     try {
       var usernamePassword = new UsernamePasswordAuthenticationToken(userDto.getEmail(), userDto.getPassword());
@@ -56,11 +55,43 @@ public class UserController {
 
       var token = tokenService.generateToken((User) auth.getPrincipal());
 
-      return ResponseEntity.ok().body(new TokenResponse(token));
+      return ResponseEntity.status(HttpStatus.ACCEPTED).body(new TokenResponse(token));
     }
     catch (Exception e) {
       System.out.println(e.getMessage());
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+  }
+
+  @GetMapping
+  public ResponseEntity<List<User>> loadUsersByUsername() {
+    try {
+      List<User> userList = userService.loadUsersByUsername();
+      return ResponseEntity.status(HttpStatus.ACCEPTED).body(userList);
+    }
+    catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    }
+  }
+
+  @DeleteMapping("delete/{email}")
+  public ResponseEntity deleteUser(@PathVariable String email) {
+    try {
+      userService.deleteUser(email);
+      return ResponseEntity.status(HttpStatus.ACCEPTED).body("User deleted!");
+    } catch (UsernameNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+  }
+
+  @PostMapping("update")
+  public ResponseEntity updateUser(@RequestBody RegisterUserDto userDto) {
+    try {
+      userService.updateUser(userDto);
+      return ResponseEntity.status(HttpStatus.ACCEPTED).body(userDto);
+    }
+    catch (UsernameNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
     }
   }
 }

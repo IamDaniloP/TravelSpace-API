@@ -1,6 +1,7 @@
 package com.travelspace.usermanager.infra.security;
 
-import com.travelspace.usermanager.repositories.UserRepository;
+import com.travelspace.usermanager.domain.entities.User;
+import com.travelspace.usermanager.repositories.interfaces.IUserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,7 +22,7 @@ public class SecurityFilter extends OncePerRequestFilter {
   private TokenService tokenService;
 
   @Autowired
-  private UserRepository repository;
+  private IUserRepository repository;
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
